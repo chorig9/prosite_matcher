@@ -1,0 +1,5 @@
+A-A-B AABC
+{ABC}-F(0,2)-[ABC] DFFC
+A(0,2)-x(0,2)-B AAB
+A(0,2)-x(0,2)-B B
+A(0,2)-x(0,2)-B C

@@ -225,19 +225,62 @@ let matchPattern input patternGraph =
     |> List.fold folder startState
     |> List.filter (ProcessedStateGetState >> isEndState)
     |> List.map ProcessedStateGetIndex
+    |> List.distinct
 
 let buildMatcher pattern =
     pattern
-    |> Seq.toList
     |> split '-'
     |> traverseOptionM toPatterns
-    |> Option.bind (List.concat >> buildGraph >> Some)
+    |> Option.map List.concat
+    |> Option.map buildGraph
+
+// let matchExpression pattern sequence =
+//     buildMatcher pattern
+//     |> Option.map (sequence |> matchPattern)
+
+let matchExpressionWithMatcher sequence matcher =
+    let rec matchExpressionIterative acc seq =
+        match seq with
+        | head::tail ->
+            let matches = matchPattern seq matcher
+            matchExpressionIterative (matches::acc) tail
+        | [] -> acc
+
+    let makeRange startIndex endIndex =
+        (startIndex, startIndex + endIndex)
+
+    matchExpressionIterative [] sequence
+    |> List.rev
+    |> List.indexed
+    |> List.collect (fun (startIndex, matches) -> List.map (makeRange startIndex) matches) 
 
 let matchExpression pattern sequence =
     buildMatcher pattern
-    |> Option.bind ((sequence |> Seq.toList |> matchPattern) >> Some)
+    |> Option.map (matchExpressionWithMatcher sequence)
 
-let pattern = "[abcd](3)-x(0,2)-b"
-let input = "abdbbb"
+//let pattern = "[abcd](3)-x(0,2)-b" |> Seq.toList
+// let pattern = "x(0,2)-b(0,2)-c" |> Seq.toList
+// let input = "bbc" |> Seq.toList
 
-let test = matchExpression pattern input
+// let test = matchExpression pattern input
+
+////////////////////////////////////////////////////////////////////////////////////////////
+
+open System.IO
+
+let readLines (filePath:string) = seq {
+    use sr = new StreamReader (filePath)
+    while not sr.EndOfStream do
+        yield sr.ReadLine ()
+}
+
+let toPatternAndSequnce input =
+    match (input |> Seq.toList |> split ' ') with
+    | pattern::[sequence] -> Some (pattern, sequence)
+    | _ -> None
+
+let result = readLines "test.txt" 
+            |> Seq.toList
+            |> List.map (toPatternAndSequnce >> (Option.bind (fun (p, s) -> matchExpression p s)))
+
+printf "%O" result
