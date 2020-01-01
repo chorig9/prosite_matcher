@@ -279,8 +279,17 @@ let toPatternAndSequnce input =
     | pattern::[sequence] -> Some (pattern, sequence)
     | _ -> None
 
+let printMatches matches =
+    match matches with
+    | Some m when List.isEmpty m ->
+        printf "No matches"
+    | Some m ->
+        List.iter (printf "%O ") m
+    | None ->
+        printf "Pattern error"
+
+    printf "\n"
+
 let result = readLines "test.txt" 
             |> Seq.toList
-            |> List.map (toPatternAndSequnce >> (Option.bind (fun (p, s) -> matchExpression p s)))
-
-printf "%O" result
+            |> List.map (toPatternAndSequnce >> (Option.bind (fun (p, s) -> matchExpression p s)) >> printMatches)
