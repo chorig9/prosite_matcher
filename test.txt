@@ -3,3 +3,4 @@ A-A-B AABC
 A(0,2)-x(0,2)-B AAB
 A(0,2)-x(0,2)-B B
 A(0,2)-x(0,2)-B C
+x(0,2)-A-B(2,3)-[ABC](2)-x(0,1) XXABBBABX
